@@ -5,7 +5,9 @@ import hitCow from './CollisionCow'
 import hitTree from './CollisionTree'
 import PrincessMovement from './PrincessMovement'
 import CowMovement from './CowMovement'
-import grid, {size} from './TreeMapper'
+import grid from './TreeMapper'
+
+let size = grid.length
 
 const Application = PIXI.Application,
     Container = PIXI.Container,
@@ -56,22 +58,37 @@ function setup() {
   const princessTexture = TextureCache["NinjaAdventure/Actor/Characters/Princess/SpriteSheet.png"];
   const OldManTexture = TextureCache["NinjaAdventure/Actor/Characters/OldMan2/SpriteSheet.png"];
   const CowTexture = TextureCache["NinjaAdventure/Actor/Animals/Cow/SpriteSheetWhite.png"];
-  const CowTextureSide = TextureCache["NinjaAdventure/Actor/Animals/Cow/SpriteSheetWhiteSide.png"];
+  // const CowTextureSide = TextureCache["NinjaAdventure/Actor/Animals/Cow/SpriteSheetWhiteSide.png"];
   const TreeTexture = TextureCache["NinjaAdventure/Backgrounds/Tilesets/TilesetNature.png"]
   const TreeTexture2 = lodash.cloneDeep(TreeTexture) //Need to clone the tileset because you cant import the same one twice
+  const Shrub1 = lodash.cloneDeep(TreeTexture)
+  const Shrub2 = lodash.cloneDeep(TreeTexture)
+  const Shrub3 = lodash.cloneDeep(TreeTexture)
+  const Shrub4 = lodash.cloneDeep(TreeTexture)
+  const Shrub5 = lodash.cloneDeep(TreeTexture)
   const HouseTexture = TextureCache["NinjaAdventure/Backgrounds/Tilesets/TilesetHouse.png"]
   
   const small = new Rectangle(0, 0, 16, 16);
   const treeFrame = new Rectangle(0, 0, 32, 32)
   const treeFrame2 = new Rectangle(32, 0, 32, 32)
   const houseFrame = new Rectangle(8, 80, 32, 32)
+  const shrubFrame1 = new Rectangle(0, 160, 16, 16)
+  const shrubFrame2 = new Rectangle(16, 160, 16, 16)
+  const shrubFrame3 = new Rectangle(32, 160, 16, 16)
+  const shrubFrame4 = new Rectangle(48, 160, 16, 16)
+  const shrubFrame5 = new Rectangle(64, 160, 16, 16)
   
   princessTexture.frame = small
   OldManTexture.frame = small
   CowTexture.frame = small
-  CowTextureSide.frame = small
+  // CowTextureSide.frame = small
   HouseTexture.frame = houseFrame
   TreeTexture.frame = treeFrame
+  Shrub1.frame = shrubFrame1
+  Shrub2.frame = shrubFrame2
+  Shrub3.frame = shrubFrame3
+  Shrub4.frame = shrubFrame4
+  Shrub5.frame = shrubFrame5
   TreeTexture2.frame = treeFrame2
   
   princess = new Sprite(princessTexture);
@@ -98,7 +115,7 @@ function setup() {
   
   
   PrincessMovement(princess,princessTexture)
-  CowMovement(cow,CowTexture,CowTextureSide,princess,size)
+  CowMovement(cow,CowTexture,null,princess,size)
   
   game.addChild(cow)
   game.addChild(house)
@@ -106,6 +123,14 @@ function setup() {
   
   trees = []
   let treesTexture = [TreeTexture,TreeTexture2]
+  let shrubsTexture = [Shrub1,Shrub2,Shrub3,Shrub4,Shrub5]
+  
+  for (let i = 0; i < size * size; i++){
+    let plant = new Sprite(shrubsTexture[Math.round(Math.random() * 4)])
+    plant.x = Math.random() * size * 32
+    plant.y = Math.random() * size * 32
+    game.addChild(plant)
+  }
   
   for (let i = 0; i < grid.length; i ++){ //placing all the trees as a grid
     const row = grid[i]

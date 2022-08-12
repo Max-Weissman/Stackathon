@@ -1,5 +1,5 @@
 const random = 0.5 //number of squares that are trees
-export const size = 20 //width and height of grid
+const size = 20 //width and height of grid
 
 const makeGrid = () => {
     let grid = []
