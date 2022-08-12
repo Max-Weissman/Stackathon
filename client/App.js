@@ -176,7 +176,7 @@ function play(delta) {
   if (hitCow(princess,OldMan)){
     console.log('ow') 
   }
-  if (hitCow(princess,cow)){ //show game over screen if princess touches cow
+  if (hitCow(princess,cow) && !win.visible){ //show game over screen if princess touches cow
     game.visible = false
     lose.visible = true
   }
