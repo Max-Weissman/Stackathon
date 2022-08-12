@@ -5,16 +5,23 @@ import hitCow from './CollisionCow'
 import hitTree from './CollisionTree'
 import PrincessMovement from './PrincessMovement'
 import CowMovement from './CowMovement'
-import grid from './TreeMapper'
+import grid, {size} from './TreeMapper'
 
 const Application = PIXI.Application,
+    Container = PIXI.Container,
     loader = PIXI.Loader.shared,
     resources = PIXI.Loader.shared.resources,
     Sprite = PIXI.Sprite,
     Rectangle = PIXI.Rectangle,
-    TextureCache = PIXI.utils.TextureCache
+    TextureCache = PIXI.utils.TextureCache,
+    TextStyle = PIXI.TextStyle,
+    Text = PIXI.Text
 
-const app = new Application({width: 256, height: 256, translucent: true})
+const app = new Application({width: size * 32, height: size * 32, translucent: true})
+
+const game = new Container()
+const lose = new Container()
+const win = new Container()
 
 const rend = app.renderer
 
@@ -22,9 +29,9 @@ rend.backgroundColor = "0x23dc5c"
 
 // rend.autoDensity = true
 // rend.resize(512,512)
-app.resizeTo = window
 
 document.body.appendChild(app.view)
+
 
 loader.onProgress.add(loadProgressHandler)
 
@@ -33,7 +40,8 @@ loader
   "NinjaAdventure/Actor/Characters/OldMan2/SpriteSheet.png",
   "NinjaAdventure/Actor/Animals/Cow/SpriteSheetWhite.png",
   "NinjaAdventure/Actor/Animals/Cow/SpriteSheetWhiteSide.png",
-  "NinjaAdventure/Backgrounds/Tilesets/TilesetNature.png"])
+  "NinjaAdventure/Backgrounds/Tilesets/TilesetNature.png",
+  "NinjaAdventure/Backgrounds/Tilesets/TilesetHouse.png"])
   .load(setup);
   
 function loadProgressHandler(loader, resource){
@@ -42,7 +50,7 @@ function loadProgressHandler(loader, resource){
   console.log(resource.error)
 }
 
-let princess,OldMan,cow,trees,state
+let princess,OldMan,cow, house,trees,state
 
 function setup() {
   const princessTexture = TextureCache["NinjaAdventure/Actor/Characters/Princess/SpriteSheet.png"];
@@ -51,22 +59,25 @@ function setup() {
   const CowTextureSide = TextureCache["NinjaAdventure/Actor/Animals/Cow/SpriteSheetWhiteSide.png"];
   const TreeTexture = TextureCache["NinjaAdventure/Backgrounds/Tilesets/TilesetNature.png"]
   const TreeTexture2 = lodash.cloneDeep(TreeTexture) //Need to clone the tileset because you cant import the same one twice
+  const HouseTexture = TextureCache["NinjaAdventure/Backgrounds/Tilesets/TilesetHouse.png"]
   
   const small = new Rectangle(0, 0, 16, 16);
   const treeFrame = new Rectangle(0, 0, 32, 32)
   const treeFrame2 = new Rectangle(32, 0, 32, 32)
+  const houseFrame = new Rectangle(8, 80, 32, 32)
   
   princessTexture.frame = small
   OldManTexture.frame = small
   CowTexture.frame = small
   CowTextureSide.frame = small
-  
+  HouseTexture.frame = houseFrame
   TreeTexture.frame = treeFrame
   TreeTexture2.frame = treeFrame2
   
   princess = new Sprite(princessTexture);
   OldMan = new Sprite(OldManTexture);
   cow = new Sprite(CowTexture)
+  house = new Sprite(HouseTexture)
   
   princess.x = 10
   princess.y = 10
@@ -77,17 +88,21 @@ function setup() {
   OldMan.x = 100
   OldMan.y = 100
   
-  cow.x = 20
-  cow.y = 20
+  cow.x = (size - 0.7) * 32
+  cow.y = (size - 1) * 32
   cow.vx = 0
   cow.vy = 0
   
+  house.x = (size - 1) * 32
+  house.y = (size - 1) * 32
+  
   
   PrincessMovement(princess,princessTexture)
-  CowMovement(cow,CowTexture,CowTextureSide)
+  CowMovement(cow,CowTexture,CowTextureSide,princess,size)
   
-  app.stage.addChild(cow)
-  app.stage.addChild(OldMan)
+  game.addChild(cow)
+  game.addChild(house)
+  game.addChild(OldMan)
   
   trees = []
   let treesTexture = [TreeTexture,TreeTexture2]
@@ -100,14 +115,39 @@ function setup() {
         let tree= new Sprite(treesTexture[Math.round(Math.random())])
         tree.x = j * 32
         tree.y = i * 32
-        app.stage.addChild(tree)
+        game.addChild(tree)
         trees.push(tree)
       }
     }
   }
-  app.stage.addChild(princess)
- 
   
+  game.addChild(princess)
+  
+  const style = new TextStyle({
+    fontFamily: "fantasy",
+    fontSize: 64
+  });
+  const halfway = size * 32 /2
+  
+  let messageLose = new Text("You lose", style)
+  messageLose.position.set(halfway,halfway)
+  messageLose.anchor.set(0.5,0.5)
+  
+  let messageWin = new Text("You win", style)
+  messageWin.position.set(halfway,halfway)
+  messageWin.anchor.set(0.5,0.5)
+  
+  lose.addChild(messageLose)
+  lose.visible = false //initially not visible
+  
+  win.addChild(messageWin)
+  win.visible = false
+  
+  app.stage.addChild(game)
+  app.stage.addChild(lose)
+  app.stage.addChild(win)
+ 
+  console.log(messageLose)
   //Capture the keyboard arrow keys
   
   state = play
@@ -136,12 +176,44 @@ function play(delta) {
   if (hitCow(princess,OldMan)){
     console.log('ow') 
   }
+  if (hitCow(princess,cow)){ //show game over screen if princess touches cow
+    game.visible = false
+    lose.visible = true
+  }
+  if (princess.x > (size - 1) * 32 && princess.y > (size - 1) * 32){ //show win screen if reach bottom right corner of maze
+    game.visible = false
+    win.visible = true
+  }
   trees.forEach(tree => {
     if (hitTree(princess,tree)){ //Stops princess from moving into the trees
       princess.x -= princess.vx
       princess.y -= princess.vy
     }
   })
+  if (princess.x < 0){ //stay in bounds
+    princess.x = 0
+  }
+  if (princess.y < 0){
+    princess.y = 0
+  }
+  if (princess.x > size * 32){ 
+    princess.x = size * 32
+  }
+  if (princess.y > size * 32){
+    princess.y = size * 32
+  }
+  if (cow.x < 0){
+    cow.x = 0
+  }
+  if (cow.y < 0){
+    cow.y = 0
+  }
+  if (cow.x > size * 32 - 16){
+    cow.x = size * 32 - 16
+  }
+  if (cow.y > size * 32 - 16){
+    cow.y = size * 32 - 16
+  }
 }
 
 
