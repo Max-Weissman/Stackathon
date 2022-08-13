@@ -127,8 +127,8 @@ function setup() {
   
   for (let i = 0; i < size * size; i++){
     let plant = new Sprite(shrubsTexture[Math.round(Math.random() * 4)])
-    plant.x = Math.random() * size * 32
-    plant.y = Math.random() * size * 32
+    plant.x = Math.floor(Math.random() * 32) * size
+    plant.y = Math.floor(Math.random() * 32) * size
     game.addChild(plant)
   }
   
