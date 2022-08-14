@@ -20,3 +20,10 @@ form div {
   margin: 1em;
   display: inline-block;
 }
+
+canvas {
+  display: block;
+  margin: auto;
+  width: auto;
+  border: solid green 1px;
+}

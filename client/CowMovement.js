@@ -17,7 +17,7 @@ function plumin (one, two, size){
   }
 }
 
-function CowMovement (cow,cowTexture,cowTextureSide,princess, size) {
+function CowMovement (cow,cowTexture,princess, size) {
   let speed = [[-1,0],[0,-1],[1,0],[0,1]]
   const idle = new Rectangle(0, 0, 16, 16);
   const move = new Rectangle(16, 0, 16, 16);
@@ -54,7 +54,7 @@ function CowMovement (cow,cowTexture,cowTextureSide,princess, size) {
       if (Math.abs(princess.y - cow.y) > size * 32 / distances[i]){
         cow.y = plumin(princess.y, size * 32 / distances[i], size)
       }
-    }, times[i])
+    }, times[i] + 5000)
   }
   
   setTimeout(function() {
@@ -66,7 +66,7 @@ function CowMovement (cow,cowTexture,cowTextureSide,princess, size) {
         cow.y = plumin(princess.y, size * 32 / 15, size)
       }
     }, 100)
-  }, 18000)
+  }, 23000)
 }
 
 export default CowMovement
