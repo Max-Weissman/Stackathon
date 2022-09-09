@@ -1,6 +1,5 @@
 {
-  "homepage": "http://max-weissman.github.io/stackathon",
-  "mode": "production",
+  "homepage": "http://max-weissman.github.io/Stackathon",
   "name": "fs-app-template",
   "version": "2.0.0",
   "description": "Some boilerplate code to get you started - get shakin'!",
@@ -28,7 +27,6 @@
     "bcrypt": "^5.0.0",
     "compression": "^1.7.3",
     "express": "^4.16.4",
-    "gh-pages": "^4.0.0",
     "history": "^4.9.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
@@ -48,6 +46,7 @@
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
     "esm": "^3.2.25",
+    "gh-pages": "^4.0.0",
     "mocha": "^6.2.3",
     "nodemon": "^1.19.4",
     "react": "^16.8.6",
