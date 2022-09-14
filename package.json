@@ -4,6 +4,7 @@
   "description": "Some boilerplate code to get you started - get shakin'!",
   "main": "index.js",
   "scripts": {
+    "build": "webpack",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "seed": "node script/seed.js",
@@ -43,6 +44,7 @@
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
     "esm": "^3.2.25",
+    "gh-pages": "^4.0.0",
     "mocha": "^6.2.3",
     "nodemon": "^1.19.4",
     "react": "^16.8.6",
