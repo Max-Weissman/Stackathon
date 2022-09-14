@@ -48,7 +48,6 @@ function CowMovement (cow,cowTexture,cowTextureSide,princess, size) {
   for (let i = 0; i < distances.length; i++){
     setTimeout(function() {
       scuttleCounter++
-      console.log(i)
       if (Math.abs(princess.x - cow.x) > size * 32 / distances[i]){
         cow.x = plumin(princess.x, size * 32 / distances[i], size)
       }
