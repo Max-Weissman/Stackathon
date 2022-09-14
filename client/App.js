@@ -21,6 +21,7 @@ const Application = PIXI.Application,
 
 const app = new Application({width: size * 32, height: size * 32, translucent: true})
 
+const start = new Container()
 const game = new Container()
 const lose = new Container()
 const win = new Container()
@@ -43,7 +44,8 @@ loader
   "NinjaAdventure/Actor/Animals/Cow/SpriteSheetWhite.png",
   "NinjaAdventure/Actor/Animals/Cow/SpriteSheetWhiteSide.png",
   "NinjaAdventure/Backgrounds/Tilesets/TilesetNature.png",
-  "NinjaAdventure/Backgrounds/Tilesets/TilesetHouse.png"])
+  "NinjaAdventure/Backgrounds/Tilesets/TilesetHouse.png",
+  "NinjaAdventure/Backgrounds/Tilesets/TilesetFloorDetail.png"])
   .load(setup);
   
 function loadProgressHandler(loader, resource){
@@ -52,7 +54,7 @@ function loadProgressHandler(loader, resource){
   console.log(resource.error)
 }
 
-let princess,OldMan,cow, house,trees,state
+let begin,princess,OldMan,cow,house,gemsFast,gemsSlow,gemSpeed,trees,state
 
 function setup() {
   const princessTexture = TextureCache["NinjaAdventure/Actor/Characters/Princess/SpriteSheet.png"];
@@ -66,7 +68,10 @@ function setup() {
   const Shrub3 = lodash.cloneDeep(TreeTexture)
   const Shrub4 = lodash.cloneDeep(TreeTexture)
   const Shrub5 = lodash.cloneDeep(TreeTexture)
+  const Gem1 = lodash.cloneDeep(TreeTexture)
+  const Gem2 = lodash.cloneDeep(TreeTexture)
   const HouseTexture = TextureCache["NinjaAdventure/Backgrounds/Tilesets/TilesetHouse.png"]
+  const Floor = TextureCache["NinjaAdventure/Backgrounds/Tilesets/TilesetFloorDetail.png"]
   
   const small = new Rectangle(0, 0, 16, 16);
   const treeFrame = new Rectangle(0, 0, 32, 32)
@@ -77,6 +82,9 @@ function setup() {
   const shrubFrame3 = new Rectangle(32, 160, 16, 16)
   const shrubFrame4 = new Rectangle(48, 160, 16, 16)
   const shrubFrame5 = new Rectangle(64, 160, 16, 16)
+  const gemFrame1 = new Rectangle(0, 240, 16, 16)
+  const gemFrame2 = new Rectangle(16, 240, 16, 16)
+  const floorFrame = new Rectangle(48, 40, 16, 8)
   
   princessTexture.frame = small
   OldManTexture.frame = small
@@ -89,6 +97,10 @@ function setup() {
   Shrub3.frame = shrubFrame3
   Shrub4.frame = shrubFrame4
   Shrub5.frame = shrubFrame5
+  Gem1.frame = gemFrame1
+  Gem2.frame = gemFrame2
+  Floor.frame = floorFrame
+  
   TreeTexture2.frame = treeFrame2
   
   princess = new Sprite(princessTexture);
@@ -113,26 +125,63 @@ function setup() {
   house.x = (size - 1) * 32
   house.y = (size - 1) * 32
   
+  gemSpeed = 1
+  
   
   PrincessMovement(princess,princessTexture)
-  CowMovement(cow,CowTexture,null,princess,size)
+  CowMovement(cow,CowTexture,princess,size)
   
   game.addChild(cow)
   game.addChild(house)
   game.addChild(OldMan)
   
+  gemsFast = []
+  gemsSlow = []
+  let shrubPosition = {}
   trees = []
+  
+  let shrubsTexture = [Shrub1,Shrub2,Shrub3,Shrub4,Shrub5,Gem1,Gem2]
   let treesTexture = [TreeTexture,TreeTexture2]
-  let shrubsTexture = [Shrub1,Shrub2,Shrub3,Shrub4,Shrub5]
   
   for (let i = 0; i < size * size; i++){
-    let plant = new Sprite(shrubsTexture[Math.round(Math.random() * 4)])
-    plant.x = Math.floor(Math.random() * 32) * size
-    plant.y = Math.floor(Math.random() * 32) * size
+    let num = Math.round(Math.random() * 6)
+    let plant = new Sprite(shrubsTexture[num])
+    plant.x = Math.floor(Math.random() * size * 2) * 16
+    plant.y = Math.floor(Math.random() * size * 2) * 16
+    let overlap = true
+    while(overlap){ //Make sure that no shrubs/gems are overlapping
+      if (shrubPosition[plant.x.toString() + plant.y.toString()]){
+        plant.x = Math.floor(Math.random() * size * 2) * 16
+        plant.y = Math.floor(Math.random() * size * 2) * 16
+      }
+      else {
+        overlap = false
+      }
+    }
     game.addChild(plant)
+    shrubPosition[plant.x.toString() + plant.y.toString()] = true
+    if (num === 5){
+      gemsSlow.push(plant)
+    }
+    else if (num === 6){
+      gemsFast.push(plant)
+    }
   }
   
-  for (let i = 0; i < grid.length; i ++){ //placing all the trees as a grid
+  for (let i = 0; i < size * 2; i++){
+    for (let j = 0; j < size * 2; j++){
+      if (Math.random() > 0.3){
+        let floor = new Sprite(Floor)
+        floor.x = i * 16
+        floor.y = j * 16
+        if (!shrubPosition[floor.x.toString() + floor.y.toString()]){
+            game.addChild(floor)
+        }
+      }
+    }
+  }
+  
+  for (let i = 0; i < size; i ++){ //placing all the trees as a grid
     const row = grid[i]
     for (let j = 0; j < row.length; j++){
       const cell = row[j]
@@ -152,6 +201,20 @@ function setup() {
     fontFamily: "fantasy",
     fontSize: 64
   });
+  const style2 = new TextStyle({
+    fontFamily: "fantasy",
+    fontSize: 54,
+    align: "center",
+    dropShadow: true,
+    dropShadowColor: "green"
+  });
+  const style3 = new TextStyle({
+    fontFamily: "fantasy",
+    fontSize: 20,
+    align: "center",
+    dropShadow: true,
+    dropShadowColor: "grey"
+  });
   const halfway = size * 32 /2
   
   let messageLose = new Text("You lose", style)
@@ -162,20 +225,36 @@ function setup() {
   messageWin.position.set(halfway,halfway)
   messageWin.anchor.set(0.5,0.5)
   
+  let instructions = new Text("Use the arrow keys to move\nReach the arch at the end of the forest\nWatch out for the cow", style3)
+  instructions.position.set(halfway,halfway * 0.3)
+  instructions.anchor.set(0.5,0.5)
+  
+  let title = new Text("Princess Pixi\n Escape the Dread Cowboy!!", style2)
+  title.position.set(halfway,halfway * 0.8)
+  title.anchor.set(0.5,0.5)
+  
+  begin = new Text("Start", style)
+  begin.position.set(halfway,halfway * 1.3)
+  begin.anchor.set(0.5,0.5)
+  
+  start.addChild(instructions)
+  start.addChild(title)
+  start.addChild(begin)
+  
+  game.visible = false
+  
   lose.addChild(messageLose)
   lose.visible = false //initially not visible
   
   win.addChild(messageWin)
   win.visible = false
   
+  app.stage.addChild(start)
   app.stage.addChild(game)
   app.stage.addChild(lose)
   app.stage.addChild(win)
- 
-  console.log(messageLose)
-  //Capture the keyboard arrow keys
   
-  state = play
+  state = pause
   app.ticker.add(() => gameLoop())
 }
 
@@ -191,9 +270,8 @@ function clear(interval){
 
 function play(delta) {
 
-  //Move the sprite 1 pixel to the right each frame
-  princess.x += princess.vx;
-  princess.y += princess.vy;
+  princess.x += princess.vx * gemSpeed;
+  princess.y += princess.vy * gemSpeed;
   
   cow.x += cow.vx;
   cow.y += cow.vy;
@@ -201,18 +279,43 @@ function play(delta) {
   if (hitCow(princess,OldMan)){
     console.log('ow') 
   }
-  if (hitCow(princess,cow) && !win.visible){ //show game over screen if princess touches cow
+  if (hitCow(princess,cow)){ //show game over screen if princess touches cow
     game.visible = false
     lose.visible = true
+    state = pause
   }
   if (princess.x > (size - 1) * 32 && princess.y > (size - 1) * 32){ //show win screen if reach bottom right corner of maze
     game.visible = false
     win.visible = true
+    state = pause
   }
   trees.forEach(tree => {
     if (hitTree(princess,tree)){ //Stops princess from moving into the trees
-      princess.x -= princess.vx
-      princess.y -= princess.vy
+      princess.x -= princess.vx * gemSpeed
+      princess.y -= princess.vy * gemSpeed
+    }
+  })
+  gemsSlow.forEach(gem => { //when hit a gem change speed and remove the gem
+    if (hitCow(princess, gem)){
+      if (!gem.hit){
+        gemSpeed -= 0.1
+      }
+      gem.hit = true
+      if (gemSpeed < 0){
+        gemSpeed = 0
+      }
+      game.removeChild(gem)
+      gem = ''
+    }
+  })
+  gemsFast.forEach(gem => {
+    if (hitCow(princess,gem)){
+      if (!gem.hit){
+        gemSpeed += 0.1
+      }
+      gem.hit = true
+      game.removeChild(gem)
+      gem = ''
     }
   })
   if (princess.x < 0){ //stay in bounds
@@ -241,6 +344,18 @@ function play(delta) {
   }
 }
 
+function pause(){
+  princess.vx = 0
+  princess.vy = 0
+  cow.vx = 0
+  cow.vy = 0
+  begin.interactive = true
+  begin.on('click', () => {
+    state = play
+    game.visible = true
+    start.visible = false
+  })
+}
 
  // setTimeout(function() {sprite.position.set(100,100)}, 1000);
   // setTimeout(function() {sprite.height = 100

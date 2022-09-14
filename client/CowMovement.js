@@ -17,7 +17,7 @@ function plumin (one, two, size){
   }
 }
 
-function CowMovement (cow,cowTexture,cowTextureSide,princess, size) {
+function CowMovement (cow,cowTexture,princess, size) {
   let speed = [[-1,0],[0,-1],[1,0],[0,1]]
   const idle = new Rectangle(0, 0, 16, 16);
   const move = new Rectangle(16, 0, 16, 16);
@@ -48,6 +48,7 @@ function CowMovement (cow,cowTexture,cowTextureSide,princess, size) {
   for (let i = 0; i < distances.length; i++){
     setTimeout(function() {
       scuttleCounter++
+      console.log(i)
       if (Math.abs(princess.x - cow.x) > size * 32 / distances[i]){
         cow.x = plumin(princess.x, size * 32 / distances[i], size)
       }
