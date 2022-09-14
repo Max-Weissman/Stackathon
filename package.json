@@ -1,5 +1,6 @@
 {
   "name": "fs-app-template",
+  "homepage": "http://Max-Weissman.github.io/Stackathon",
   "version": "2.0.0",
   "description": "Some boilerplate code to get you started - get shakin'!",
   "main": "index.js",
