@@ -17,7 +17,7 @@ function plumin (one, two, size){
   }
 }
 
-function CowMovement (cow,cowTexture,princess, size) {
+function CowMovement (cow,cowTexture,cowTextureSide,princess, size) {
   let speed = [[-1,0],[0,-1],[1,0],[0,1]]
   const idle = new Rectangle(0, 0, 16, 16);
   const move = new Rectangle(16, 0, 16, 16);
